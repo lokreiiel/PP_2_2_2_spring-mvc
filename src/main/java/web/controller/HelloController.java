@@ -1,24 +1,56 @@
 package web.controller;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import web.model.User;
+import web.service.UserService;
 
 @Controller
 public class HelloController {
 
-	@GetMapping(value = "/")
-	public String printWelcome(ModelMap model) {
-		List<String> messages = new ArrayList<>();
-		messages.add("Hello!");
-		messages.add("I'm Spring MVC application");
-		messages.add("5.2.0 version by sep'19 ");
-		model.addAttribute("messages", messages);
-		return "index";
-	}
-	
+    private final UserService userService;
+
+    public HelloController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/")
+    public String allUser(Model model) {
+        model.addAttribute("users", userService.allUsers());
+        return "all";
+    }
+
+    @GetMapping("/new")
+    public String newUser(Model model) {
+        model.addAttribute("user", new User());
+        return "save";
+    }
+
+    @PostMapping("/new")
+    public String create(@ModelAttribute("user") User user) {
+        userService.add(user);
+        return "redirect:/";
+    }
+
+
+    @DeleteMapping("/{id}")
+    public String delete(@ModelAttribute("id") int id) {
+        userService.deleteUser(id);
+        return "redirect:/";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String edit(@ModelAttribute("id") int id, Model model) {
+        model.addAttribute("user", userService.showUserById(id));
+        return "edit";
+    }
+
+    @PatchMapping("/{id}")
+    public String update(@ModelAttribute("user") User user) {
+        userService.update(user);
+        return "redirect:/";
+    }
+
+
 }
